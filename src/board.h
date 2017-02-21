@@ -6,6 +6,7 @@
 #include <vector>
 #include "../utils/text.h"
 #include "info_panel.h"
+#include "../utils/timer.h"
 
 #define BOARD_WIDTH_PX	(Board::WIDTH * BLOCK_WIDTH)
 #define BOARD_HEIGHT_PX	(Board::HEIGHT * BLOCK_HEIGHT)
@@ -23,6 +24,7 @@ public:
 	bool checkVerticalCollision();
 	bool checkLeftCollision();
 	bool checkRightCollision();
+	bool checkRotationCollision();
 
 	inline bool isGameOver() const { return _game_over; }
 	void showGameOverMessage() const;
@@ -36,6 +38,7 @@ private:
 	Piece _current_piece;
 	Piece _next_piece = Piece(Piece::Shape::number_shape_map[Utils::randomNumber(0, 6)], BOARD_WIDTH_PX, BLOCK_HEIGHT);;
 	std::vector<std::vector<BlockPtr>> _blocks;
+	// Timer timer = Timer(true);
 
 private:
 	double _timer = 0;

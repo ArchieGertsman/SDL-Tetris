@@ -31,6 +31,8 @@ public:
 	inline Shape getShape() const { return _shape; }
 	inline const std::vector<BlockPtr> &getBlocks() const { return _blocks; }
 
+	void setBlockLocations(const std::vector<std::pair<int, int>> &locations);
+
 	void setPos(int x, int y);
 
 private:

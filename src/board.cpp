@@ -69,11 +69,17 @@ bool Board::checkVerticalCollision() {
 }
 
 bool Board::checkLeftCollision() {
+	for (const auto &b : _current_piece.getBlocks()) {
+		if (b->getX() - BLOCK_WIDTH < 0) {
+			return true;
+		}
+	}
+
 	for (const auto &block_row : _blocks) {
 		for (const auto &block : block_row) {
 			for (const auto &cblock : _current_piece.getBlocks()) {
 				if (cblock->getY() == block->getY() &&
-					cblock->getX() == block->getX() + BLOCK_WIDTH)
+					cblock->getX() - BLOCK_WIDTH == block->getX() + BLOCK_WIDTH)
 				{
 					return true;
 				}
@@ -84,12 +90,39 @@ bool Board::checkLeftCollision() {
 }
 
 bool Board::checkRightCollision() {
+	for (const auto &b : _current_piece.getBlocks()) {
+		if (b->getX() + BLOCK_WIDTH >= BOARD_WIDTH_PX) {
+			return true;
+		}
+	}
+
 	for (const auto &block_row : _blocks) {
 		for (const auto &block : block_row) {
 			for (const auto &cblock : _current_piece.getBlocks()) {
 				if (cblock->getY() == block->getY() &&
-					(cblock->getX() == block->getX() - BLOCK_WIDTH)
+					(cblock->getX() + BLOCK_WIDTH == block->getX() - BLOCK_WIDTH)
 					/*|| cblock->getX() == block->getX() + BLOCK_WIDTH*/)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool Board::checkRotationCollision() {
+	for (const auto &b : _current_piece.getBlocks()) {
+		if (b->getX() - BLOCK_WIDTH < 0 || b->getX() >= BOARD_WIDTH_PX) {
+			return true;
+		}
+	}
+
+	for (const auto &block_row : _blocks) {
+		for (const auto &block : block_row) {
+			for (const auto &cblock : _current_piece.getBlocks()) {
+				if (cblock->getY() == block->getY() &&
+					cblock->getX() == block->getX())
 				{
 					return true;
 				}
@@ -125,17 +158,13 @@ void Board::pollEvents(const SDL_Event &event) {
 		if (!_paused) {
 			switch (event.key.keysym.sym) {
 			case SDLK_LEFT:
-				if (_current_piece.getX() > 0) {
-					if (!checkLeftCollision()) {
-						_current_piece.moveLeft();
-					}
+				if (!checkLeftCollision()) {
+					_current_piece.moveLeft();
 				}
 				break;
 			case SDLK_RIGHT:
-				if (_current_piece.getX() < BOARD_WIDTH_PX - _current_piece.getWidth()) {
-					if (!checkRightCollision()) {
-						_current_piece.moveRight();
-					}
+				if (!checkRightCollision()) {
+					_current_piece.moveRight();
 				}
 				break;
 			case SDLK_SPACE:
@@ -147,7 +176,14 @@ void Board::pollEvents(const SDL_Event &event) {
 				break;
 			case SDLK_UP:
 				if (_current_piece.getShape() != Piece::Shape::O) {
+					std::vector<std::pair<int, int>> temp_block_locations;
+					for (const auto &b : _current_piece.getBlocks()) {
+						temp_block_locations.push_back(std::make_pair(b->getX(), b->getY()));
+					}
 					_current_piece.rotate();
+					if (checkRotationCollision()) {
+						_current_piece.setBlockLocations(temp_block_locations);
+					}
 				}
 				break;
 			case SDLK_DOWN:

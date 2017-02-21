@@ -69,6 +69,13 @@ void Piece::calculateDimensions() {
 	_height = max_coords.second + BLOCK_HEIGHT - _y;
 }
 
+void Piece::setBlockLocations(const std::vector<std::pair<int, int>> &locations) {
+	for (auto i = 0; i < locations.size(); ++i) {
+		_blocks[i]->setPos(locations[i].first, locations[i].second);
+	}
+	calculateDimensions();
+}
+
 void Piece::draw() const {
 	for (const auto &b : _blocks) {
 		b->draw();
